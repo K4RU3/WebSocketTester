@@ -100,7 +100,7 @@
         try{
             if(socket) socket.close()
             socket = null
-            socket = new WebSocket("ws://" + addressInput.value + ":" + portInput.value)
+            socket = new WebSocket("wss://" + addressInput.value + ":" + portInput.value)
 
             socket.onopen = ()=>{
                 log("WebSocketが正常に開始されました。")
