@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="icons/256.png">
+    <title>WebSocket generator(beta)</title>
+</head>
+<body>
+    <img src="icons/256.png">
+    <h1>WebSocket Tester(beta)</h1>
+    <p>正しく利用してね^^</p>
+
+    <div id="main">
+        <div id="setting">
+            <label for="ip">address: </label>
+            <input type="text" id="address">
+            <label for="port">Port: </label>
+            <input type="number" id="port">
+            <button id="start">開始する。</button>
+            <textarea name="" id="logs" cols="30" rows="10" readonly></textarea>
+            <button id="clearLog">clear log</button>
+            <button id="close">close</button>
+        </div>
+
+        <div id="send">
+            <label for="sendButton">送信するデータを入力してください。</label>
+            <button id="sendButton">送信</button>
+            <textarea name="" id="sendData" cols="30" rows="10"></textarea>
+        </div>
+
+        <div id="receive">
+            <label>受信したデータ</label>
+            <button id="clear">clear</button>
+            <textarea name="" id="receiveData" cols="30" rows="10" readonly></textarea>
+        </div>
+    </div>
+</body>
+
+<style>
+    h1, p{
+        text-align: center;
+        user-select: none;
+    }
+
+    img {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 3%;
+        height: 6%;
+        user-select: none;
+    }
+
+    #main {
+        display: flex;
+    }
+
+    #setting, #send, #receive {
+        border: solid black 1px;
+        flex: 1;
+        padding: 10px;
+    }
+
+    textarea{
+        width: 100%;
+        height: 70vh;
+    }
+
+
+    #receiveData, #logs{
+        resize: none;
+    }
+
+</style>
+
+<script>
+    let ip,port,socket;
+
+    //第一セクション
+    let addressInput = document.querySelector("#address")
+    let portInput = document.querySelector("#port")
+    let startButton = document.querySelector("#start")
+    let logs = document.querySelector("#logs")
+    let clearLog = document.querySelector("#clearLog")
+    let closeButton = document.querySelector("#close")
+
+
+    //第二セクション
+    let sendButton = document.querySelector("#sendButton")
+    let sendData = document.querySelector("#sendData")
+
+
+    //第三セクション
+    let clearButton = document.querySelector("#clear")
+    let receiveData = document.querySelector("#receiveData")
+
+
+    //第一セクション
+    startButton.addEventListener("click",()=>{
+        try{
+            if(socket) socket.close()
+            socket = null
+            socket = new WebSocket("ws://" + addressInput.value + ":" + portInput.value)
+
+            socket.onopen = ()=>{
+                log("WebSocketが正常に開始されました。")
+            }
+
+            socket.onclose = ()=>{
+                log("WebSocketが閉じられました。")
+            }
+
+            socket.onmessage = (e)=>{
+                receiveData.value = e.message + "\n" + receiveData.value
+            }
+        }catch(e){
+            log("WebSocketを開始できませんでした。: " + e.message)
+        }
+    })
+
+    clearLog.addEventListener("click", ()=>{
+        logs.value = ""
+    })
+
+    closeButton.addEventListener("click", ()=>{
+        if(socket) socket.close()
+        else log("WebSocketが開かれていません。")
+    })
+
+
+    //第二セクション
+    sendButton.addEventListener("click", ()=>{
+        if(!socket){
+            log("WebSocketが開かれていません。")
+            return
+        }
+        socket.send(sendData.value)
+        sendData.value = ""
+    })
+
+
+    //第三セクション
+    clearButton.addEventListener("click", ()=>{
+        receiveData.value = ""
+    })
+
+    //log
+    function log(...str){
+        for(let s of str){
+            logs.value = s + "\n" + logs.value
+        }
+    }
+</script>
+</html>
